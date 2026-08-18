@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Hydropower Plant — HMI</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/static/style.css" />
+</head>
+<body>
+
+<header class="topbar">
+  <div class="topbar-title">
+    <span class="topbar-eyebrow">HYDROPOWER CYBER-PHYSICAL TESTBED</span>
+    <h1>Plant View</h1>
+  </div>
+  <div class="topbar-status">
+    <span id="conn-dot" class="dot dot-unknown"></span>
+    <span id="conn-label">CONNECTING…</span>
+  </div>
+</header>
+
+<div id="alarm-banner" class="alarm-banner alarm-normal">
+  <span id="alarm-text">NORMAL — plant operating within design limits</span>
+</div>
+
+<main class="layout">
+
+  <section class="panel schematic-panel">
+    <h2 class="panel-title">Process Schematic</h2>
+
+    <svg id="schematic" viewBox="0 0 900 340" xmlns="http://www.w3.org/2000/svg">
+      <!-- Reservoir -->
+      <rect x="40" y="40" width="140" height="220" rx="6" class="vessel-outline" />
+      <clipPath id="reservoir-clip">
+        <rect x="41" y="41" width="138" height="218" rx="5" />
+      </clipPath>
+      <rect id="reservoir-water" x="41" y="150" width="138" height="109"
+            class="water-fill" clip-path="url(#reservoir-clip)" />
+      <text x="110" y="30" class="label-text" text-anchor="middle">RESERVOIR</text>
+
+      <!-- Gate -->
+      <line x1="180" y1="220" x2="230" y2="220" class="pipe-outline" />
+      <rect id="gate-bar" x="195" y="200" width="10" height="20" class="gate-shape" />
+      <text x="205" y="185" class="label-text" text-anchor="middle">GATE</text>
+
+      <!-- Penstock -->
+      <path id="penstock" d="M 230 220 L 380 260" class="pipe-outline" />
+      <path id="penstock-flow" d="M 230 220 L 380 260" class="flow-line" />
+      <text x="300" y="205" class="label-text" text-anchor="middle">PENSTOCK</text>
+
+      <!-- Turbine -->
+      <g id="turbine-group" transform="translate(420,260)">
+        <circle r="34" class="vessel-outline" />
+        <g id="turbine-blades">
+          <line x1="-28" y1="0" x2="28" y2="0" class="blade" />
+          <line x1="0" y1="-28" x2="0" y2="28" class="blade" />
+          <line x1="-20" y1="-20" x2="20" y2="20" class="blade" />
+          <line x1="-20" y1="20" x2="20" y2="-20" class="blade" />
+        </g>
+      </g>
+      <text x="420" y="215" class="label-text" text-anchor="middle">TURBINE</text>
+
+      <!-- Shaft to generator -->
+      <line x1="454" y1="260" x2="520" y2="260" class="pipe-outline" />
+
+      <!-- Generator -->
+      <rect x="520" y="235" width="70" height="50" rx="4" class="vessel-outline" />
+      <text x="555" y="265" class="label-text label-text-inside" text-anchor="middle">GEN</text>
+      <text x="555" y="215" class="label-text" text-anchor="middle">GENERATOR</text>
+
+      <!-- Transformer -->
+      <line x1="590" y1="260" x2="640" y2="260" class="pipe-outline" />
+      <rect x="640" y="240" width="60" height="40" rx="4" class="vessel-outline" />
+      <text x="670" y="265" class="label-text label-text-inside" text-anchor="middle">XFMR</text>
+      <text x="670" y="220" class="label-text" text-anchor="middle">TRANSFORMER</text>
+
+      <!-- Breaker + Grid -->
+      <line x1="700" y1="260" x2="740" y2="260" class="pipe-outline" />
+      <circle id="breaker-dot" cx="750" cy="260" r="8" class="breaker-shape" />
+      <line x1="758" y1="260" x2="800" y2="260" class="pipe-outline" />
+      <text x="850" y="265" class="label-text" text-anchor="middle">GRID</text>
+    </svg>
+  </section>
+
+  <section class="panel readout-panel">
+    <h2 class="panel-title">Telemetry</h2>
+
+    <div class="readout-grid">
+      <div class="readout">
+        <span class="readout-label">Reservoir Level</span>
+        <span class="readout-value" id="val-level">—</span>
+      </div>
+      <div class="readout">
+        <span class="readout-label">Inflow</span>
+        <span class="readout-value" id="val-inflow">—</span>
+      </div>
+      <div class="readout">
+        <span class="readout-label">Gate Position</span>
+        <span class="readout-value" id="val-gate">—</span>
+      </div>
+      <div class="readout">
+        <span class="readout-label">Flow Rate</span>
+        <span class="readout-value" id="val-flow">—</span>
+      </div>
+      <div class="readout">
+        <span class="readout-label">Turbine Speed</span>
+        <span class="readout-value" id="val-rpm">—</span>
+      </div>
+      <div class="readout">
+        <span class="readout-label">Generator Power</span>
+        <span class="readout-value" id="val-power">—</span>
+      </div>
+      <div class="readout">
+        <span class="readout-label">Grid Frequency</span>
+        <span class="readout-value" id="val-freq">—</span>
+      </div>
+      <div class="readout">
+        <span class="readout-label">Sim Time</span>
+        <span class="readout-value" id="val-time">—</span>
+      </div>
+    </div>
+
+    <div class="test-control">
+      <h3 class="test-control-title">Manual Gate Test Control</h3>
+      <p class="test-control-note">
+        Temporary control for Phase 3 verification only — replaced by a
+        real PLC register write in Phase 4/5. Not part of the final OT
+        control path.
+      </p>
+      <div class="test-control-row">
+        <input type="range" id="gate-slider" min="0" max="100" value="45" />
+        <span id="gate-slider-value">45%</span>
+      </div>
+      <button id="gate-set-btn">Send gate target</button>
+      <span id="gate-set-status"></span>
+    </div>
+  </section>
+
+</main>
+
+<script src="/static/app.js"></script>
+</body>
+</html>
