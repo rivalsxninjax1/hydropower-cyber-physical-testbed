@@ -7,9 +7,9 @@ Run with (PLC must already be running separately):
     python -m industrial.plc.plc_server        (terminal 1)
     uvicorn dashboard.backend.main:app --reload --port 8000   (terminal 2)
 """
-
 import asyncio
 import json
+import os
 import sys
 import time
 from pathlib import Path
@@ -28,8 +28,12 @@ sys.path.insert(0, str(REPO_ROOT))
 from industrial.plc import register_map as regs  # noqa: E402
 from scada.historian import db as historian  # noqa: E402
 
-PLC_HOST = "127.0.0.1"
-PLC_PORT = 5020
+# Configurable via environment so this works both:
+#   - run directly on the host (PLC_HOST defaults to 127.0.0.1)
+#   - run as a Docker container reaching the PLC by its service name
+#     (docker-compose sets PLC_HOST=plc — see docker-compose.yml)
+PLC_HOST = os.environ.get("PLC_HOST", "127.0.0.1")
+PLC_PORT = int(os.environ.get("PLC_PORT", "5020"))
 POLL_SECONDS = 1.0
 
 app = FastAPI(title="Hydropower Plant Dashboard — Phase 6 (Modbus-backed + Historian)")
@@ -180,3 +184,4 @@ app.mount("/static", StaticFiles(directory=str(FRONTEND_DIR)), name="static")
 @app.get("/")
 async def serve_index() -> FileResponse:
     return FileResponse(str(FRONTEND_DIR / "index.html"))
+

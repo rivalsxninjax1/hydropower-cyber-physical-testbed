@@ -1,0 +1,49 @@
+# Config A — flat network (weak segmentation).
+#
+# Every container here sits on ONE Docker network. This is
+# deliberately the "before" state for Section 18's segmentation
+# experiment: any container that can reach the network can reach any
+# other container, with no isolation between what will later become
+# separate corporate/DMZ/OT zones.
+#
+# Phase 8 adds an attacker container to this same file. Phase 12 adds
+# docker-compose.segmented.yml — the "after" state, splitting this
+# into corp_net/dmz_net/ot_net with a firewall boundary — so the two
+# files can be run and compared directly for the segmentation
+# experiment's before/after evidence.
+#
+# Usage:
+#   docker compose up --build
+#   docker compose down
+
+services:
+  plc:
+    build:
+      context: .
+      dockerfile: industrial/plc/Dockerfile
+    container_name: plc
+    networks:
+      - flat_net
+    restart: unless-stopped
+
+  dashboard:
+    build:
+      context: .
+      dockerfile: dashboard/backend/Dockerfile
+    container_name: dashboard
+    environment:
+      - PLC_HOST=plc
+      - PLC_PORT=5020
+    networks:
+      - flat_net
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./data:/app/data
+    depends_on:
+      - plc
+    restart: unless-stopped
+
+networks:
+  flat_net:
+    driver: bridge
