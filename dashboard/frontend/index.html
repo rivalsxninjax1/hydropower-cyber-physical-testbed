@@ -51,10 +51,11 @@
       <path id="penstock-flow" d="M 230 220 L 380 260" class="flow-line" />
       <text x="300" y="205" class="label-text" text-anchor="middle">PENSTOCK</text>
 
-      <!-- Turbine -->
+
+            <!-- Turbine -->
       <g id="turbine-group" transform="translate(420,260)">
         <circle r="34" class="vessel-outline" />
-        <g id="turbine-blades">
+        <g id="turbine-rotor">
           <line x1="-28" y1="0" x2="28" y2="0" class="blade" />
           <line x1="0" y1="-28" x2="0" y2="28" class="blade" />
           <line x1="-20" y1="-20" x2="20" y2="20" class="blade" />
@@ -94,10 +95,6 @@
         <span class="readout-value" id="val-level">—</span>
       </div>
       <div class="readout">
-        <span class="readout-label">Inflow</span>
-        <span class="readout-value" id="val-inflow">—</span>
-      </div>
-      <div class="readout">
         <span class="readout-label">Gate Position</span>
         <span class="readout-value" id="val-gate">—</span>
       </div>
@@ -114,21 +111,23 @@
         <span class="readout-value" id="val-power">—</span>
       </div>
       <div class="readout">
-        <span class="readout-label">Grid Frequency</span>
-        <span class="readout-value" id="val-freq">—</span>
-      </div>
-      <div class="readout">
-        <span class="readout-label">Sim Time</span>
-        <span class="readout-value" id="val-time">—</span>
+        <span class="readout-label">PLC Poll Latency</span>
+        <span class="readout-value" id="val-latency">—</span>
       </div>
     </div>
+    <p class="registers-note">
+      These values are polled from the PLC's Modbus TCP register map
+      (40001–40007) — this HMI has no direct connection to the physics
+      simulation.
+    </p>
 
     <div class="test-control">
-      <h3 class="test-control-title">Manual Gate Test Control</h3>
+      <h3 class="test-control-title">Operator Gate Control</h3>
       <p class="test-control-note">
-        Temporary control for Phase 3 verification only — replaced by a
-        real PLC register write in Phase 4/5. Not part of the final OT
-        control path.
+        Writes directly to Modbus register 40007 on the PLC — the same
+        register an attacker could write to without going through this
+        HMI at all (see Phase 9). No authentication exists on this
+        register yet; that is intentional, see docs/architecture/plc-register-map.md.
       </p>
       <div class="test-control-row">
         <input type="range" id="gate-slider" min="0" max="100" value="45" />
@@ -140,6 +139,24 @@
   </section>
 
 </main>
+
+<section class="panel log-panel">
+  <h2 class="panel-title">Alarm Event Log</h2>
+  <p class="registers-note">
+    Records only state <em>transitions</em> (not every poll tick) —
+    this becomes the timeline Phase 10's cyber-physical correlation
+    view is built from.
+  </p>
+  <table class="log-table">
+    <thead>
+      <tr><th>Time</th><th>Previous</th><th>New</th></tr>
+    </thead>
+    <tbody id="alarm-log-body">
+      <tr><td colspan="3" class="log-empty">Loading…</td></tr>
+    </tbody>
+  </table>
+</section>
+
 
 <script src="/static/app.js"></script>
 </body>
