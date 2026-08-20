@@ -70,3 +70,50 @@ means there is a clear "before" state to compare the "after" mitigated
 state against later (Section 27 of the project spec).
 
 ## How a command reaches the physical process
+Modbus client writes raw value to register 40007
+↓
+PLC control loop (runs once per second) reads register 40007
+↓
+If the raw value changed since the last tick:
+decode it back to a real percentage
+call PhysicsEngine.set_gate_target(percentage)
+↓
+Physics engine's rate-limited gate actuator moves toward
+the new target over several seconds (see docs/architecture/physics-model.md)
+↓
+PLC control loop writes the updated reservoir/gate/flow/turbine/
+generator/alarm values back into registers 40001-40006 every tick
+
+
+## How to test manually
+
+Terminal 1:
+```bash
+python -m industrial.plc.plc_server
+```
+
+Terminal 2:
+```bash
+python -m industrial.plc.test_client
+```
+
+The test client reads all registers, prompts for a new gate target,
+writes it to register 40007, waits 6 seconds, and reads all registers
+again — you should see `GATE_POSITION_PCT`, `FLOW_RATE_M3S`,
+`TURBINE_RPM`, and `GENERATOR_POWER_MW` all move toward the new
+steady state, and `ALARM_STATE` may change if the deviation is large
+enough.
+
+## Automated tests
+
+`industrial/tests/test_plc.py` covers:
+- register encode/decode round-tripping and clamping
+- the register map's structural integrity (exactly one writable register, no duplicate addresses)
+- the PLC's control loop correctly applying a written command to the physics engine
+- the PLC correctly ignoring an unchanged register (no spurious re-application every tick)
+- a full write → multiple ticks → physical change assertion, without opening a real socket (fast, no port conflicts)
+
+Run with:
+```bash
+pytest industrial/tests/test_plc.py -v
+```

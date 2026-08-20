@@ -44,6 +44,23 @@ services:
       - plc
     restart: unless-stopped
 
+
+  attacker:
+    build:
+      context: .
+      dockerfile: attacker/Dockerfile
+    container_name: attacker
+    networks:
+      - flat_net
+    # No ports published — this container is not meant to be reachable
+    # from the host, only to reach INTO the plant network, mirroring a
+    # real isolated attack workstation.
+    depends_on:
+      - plc
+    restart: unless-stopped
+
+
+
 networks:
   flat_net:
     driver: bridge
