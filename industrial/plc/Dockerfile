@@ -13,6 +13,7 @@ RUN pip install --no-cache-dir -r industrial/plc/requirements.txt
 
 COPY simulation/ ./simulation/
 COPY industrial/ ./industrial/
+COPY scada/ ./scada/
 
 EXPOSE 5020
 

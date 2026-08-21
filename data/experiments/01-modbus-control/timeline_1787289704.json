@@ -1,0 +1,32 @@
+[
+  {
+    "timestamp": 1787289704.975939,
+    "source": "Network",
+    "description": "Unauthorized Modbus write: register 6 = 1000 (from plc)"
+  },
+  {
+    "timestamp": 1787289705.5481935,
+    "source": "PLC",
+    "description": "Gate target command changed to 100.0%"
+  },
+  {
+    "timestamp": 1787289707.1577983,
+    "source": "Physics",
+    "description": "Flow rate detectably increasing: 68.7 -> 81.0 m3/s"
+  },
+  {
+    "timestamp": 1787289709.1880252,
+    "source": "Physics",
+    "description": "Turbine RPM detectably increasing: 1500.0 -> 1592.0"
+  },
+  {
+    "timestamp": 1787289711.214608,
+    "source": "HMI/Alarm",
+    "description": "Alarm state changed: NORMAL -> WARNING"
+  },
+  {
+    "timestamp": 1787289734.975939,
+    "source": "IDS",
+    "description": "NO DETECTION EVENT logged - no intrusion detection system exists yet in this project (see Phase 11). This gap is intentional and documented, not an oversight."
+  }
+]

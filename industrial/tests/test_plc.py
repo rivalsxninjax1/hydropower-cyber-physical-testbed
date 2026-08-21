@@ -23,6 +23,15 @@ sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", ".."))
 
 from industrial.plc import register_map as regs
 from industrial.plc.plc_server import PLC
+from scada.historian import db as historian
+
+
+def make_plc(tmp_path):
+    """Every test that instantiates a PLC now also touches the
+    historian (Phase 10) — point it at a temporary file so these
+    tests never read/write the real data/logs/historian.db."""
+    historian.DB_PATH = tmp_path / "test_historian.db"
+    return PLC()
 
 
 # --- Register map: encode/decode ---
@@ -67,15 +76,15 @@ def test_register_addresses_are_sequential_and_unique():
 
 # --- PLC control loop (no network, direct datastore access) ---
 
-def test_plc_seeds_registers_from_initial_engine_state():
-    plc = PLC()
+def test_plc_seeds_registers_from_initial_engine_state(tmp_path):
+    plc = make_plc(tmp_path)
     level_reg = regs.by_name("RESERVOIR_LEVEL_PCT")
     raw = plc.holding_registers.getValues(level_reg.zero_based_address + 1, count=1)[0]
     assert regs.decode("RESERVOIR_LEVEL_PCT", raw) == plc.engine.state()["reservoir_level_pct"]
 
 
-def test_plc_applies_a_written_gate_command():
-    plc = PLC()
+def test_plc_applies_a_written_gate_command(tmp_path):
+    plc = make_plc(tmp_path)
     target_reg = regs.by_name("GATE_TARGET_COMMAND_PCT")
 
     # Simulate a Modbus client writing 90% directly into the datastore
@@ -87,18 +96,34 @@ def test_plc_applies_a_written_gate_command():
     assert plc.engine.gate.target_pct == 90.0
 
 
-def test_plc_ignores_unchanged_register_value():
-    plc = PLC()
+def test_plc_applies_a_written_gate_command_and_logs_plc_event(tmp_path):
+    """Phase 10: applying a command should also record a plc_events row."""
+    plc = make_plc(tmp_path)
+    target_reg = regs.by_name("GATE_TARGET_COMMAND_PCT")
+
+    raw_command = regs.encode("GATE_TARGET_COMMAND_PCT", 90.0)
+    plc.holding_registers.setValues(target_reg.zero_based_address + 1, [raw_command])
+    plc._check_for_new_command()
+
+    events = historian.get_recent_plc_events(limit=10)
+    assert len(events) == 1
+    assert events[0]["new_raw"] == raw_command
+    assert events[0]["register"] == target_reg.zero_based_address
+
+
+def test_plc_ignores_unchanged_register_value(tmp_path):
+    plc = make_plc(tmp_path)
     initial_target = plc.engine.gate.target_pct
 
     plc._check_for_new_command()  # no write happened; should be a no-op
     assert plc.engine.gate.target_pct == initial_target
+    assert historian.get_recent_plc_events(limit=10) == []
 
 
-def test_plc_control_loop_produces_visible_physical_change():
+def test_plc_control_loop_produces_visible_physical_change(tmp_path):
     """End-to-end without a socket: write a command, run several ticks
     of the same loop the async server uses, confirm physics moved."""
-    plc = PLC()
+    plc = make_plc(tmp_path)
     target_reg = regs.by_name("GATE_TARGET_COMMAND_PCT")
 
     raw_command = regs.encode("GATE_TARGET_COMMAND_PCT", 90.0)

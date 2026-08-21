@@ -69,6 +69,16 @@ def init_db() -> None:
                 new_state TEXT NOT NULL
             )
         """)
+        conn.execute("""
+            CREATE TABLE IF NOT EXISTS plc_events (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                timestamp REAL NOT NULL,
+                register INTEGER NOT NULL,
+                previous_raw INTEGER,
+                new_raw INTEGER NOT NULL,
+                description TEXT
+            )
+        """)
         conn.commit()
     finally:
         conn.close()
@@ -114,6 +124,24 @@ def record_alarm_transition(previous_state: Optional[str], new_state: str) -> No
     finally:
         conn.close()
 
+def record_plc_event(register: int, previous_raw: Optional[int], new_raw: int, description: str = "") -> None:
+    """Records the moment the PLC's control loop actually APPLIED a
+    changed register value — distinct from the network write itself
+    (which the PLC has no way to timestamp independently; it only
+    knows about the write once its own polling loop notices the
+    register changed). This timestamp gap between a network write and
+    the PLC noticing it is itself meaningful data for the correlation
+    timeline in security/correlation/build_timeline.py."""
+    conn = _connect()
+    try:
+        conn.execute(
+            """INSERT INTO plc_events (timestamp, register, previous_raw, new_raw, description)
+               VALUES (?, ?, ?, ?, ?)""",
+            (time.time(), register, previous_raw, new_raw, description),
+        )
+        conn.commit()
+    finally:
+        conn.close()
 
 def get_recent_telemetry(limit: int = 100) -> list:
     conn = _connect()
@@ -131,6 +159,16 @@ def get_recent_alarm_events(limit: int = 50) -> list:
     try:
         rows = conn.execute(
             "SELECT * FROM alarm_events ORDER BY id DESC LIMIT ?", (limit,)
+        ).fetchall()
+        return [dict(row) for row in rows]
+    finally:
+        conn.close()
+
+def get_recent_plc_events(limit: int = 50) -> list:
+    conn = _connect()
+    try:
+        rows = conn.execute(
+            "SELECT * FROM plc_events ORDER BY id DESC LIMIT ?", (limit,)
         ).fetchall()
         return [dict(row) for row in rows]
     finally:

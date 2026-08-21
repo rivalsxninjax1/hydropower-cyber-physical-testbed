@@ -84,3 +84,24 @@ def test_record_and_read_alarm_transition(tmp_path):
     assert events[0]["new_state"] == "CRITICAL"
     assert events[0]["previous_state"] == "WARNING"
     assert events[-1]["previous_state"] is None
+
+def test_record_and_read_plc_event(tmp_path):
+    use_temp_db(tmp_path)
+    db.record_plc_event(register=6, previous_raw=450, new_raw=1000, description="Gate target changed to 100.0%")
+
+    events = db.get_recent_plc_events(limit=10)
+    assert len(events) == 1
+    assert events[0]["register"] == 6
+    assert events[0]["previous_raw"] == 450
+    assert events[0]["new_raw"] == 1000
+    assert "100.0%" in events[0]["description"]
+
+
+def test_plc_events_most_recent_first(tmp_path):
+    use_temp_db(tmp_path)
+    for raw in [500, 700, 900]:
+        db.record_plc_event(register=6, previous_raw=None, new_raw=raw)
+
+    events = db.get_recent_plc_events(limit=10)
+    assert events[0]["new_raw"] == 900
+    assert events[-1]["new_raw"] == 500

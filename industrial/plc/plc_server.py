@@ -22,6 +22,9 @@ Run with (from repo root):
 import asyncio
 import sys
 from pathlib import Path
+from simulation.physics_engine.engine import PhysicsEngine  # noqa: E402
+from industrial.plc import register_map as regs  # noqa: E402
+from scada.historian import db as historian  # noqa: E402
 
 from pymodbus.datastore import (
     ModbusSlaveContext,
@@ -48,6 +51,7 @@ TICK_SECONDS = 1.0
 
 class PLC:
     def __init__(self):
+        historian.init_db()
         self.engine = PhysicsEngine()
 
         # One holding-register block sized to the register map.
@@ -106,9 +110,16 @@ class PLC:
                 f"{self._last_known_target_raw} -> {raw} "
                 f"({new_target_pct:.1f}%). Applying to physics engine."
             )
+            historian.record_plc_event(
+                register=target_reg.zero_based_address,
+                previous_raw=self._last_known_target_raw,
+                new_raw=raw,
+                description=f"Gate target command changed to {new_target_pct:.1f}%",
+            )
             self.engine.set_gate_target(new_target_pct)
             self._last_known_target_raw = raw
 
+            
     async def run_control_loop(self) -> None:
         while True:
             self._check_for_new_command()
