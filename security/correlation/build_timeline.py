@@ -117,15 +117,31 @@ def build_timeline(experiment_path: Path) -> list:
                 ),
             })
 
-    events.append({
-        "timestamp": window_end,
-        "source": "IDS",
-        "description": (
-            "NO DETECTION EVENT logged - no intrusion detection system "
-            "exists yet in this project (see Phase 11). This gap is "
-            "intentional and documented, not an oversight."
-        ),
-    })
+    ids_alerts_in_window = [
+        a for a in historian.get_recent_ids_alerts(limit=100)
+        if window_start <= a["timestamp"] <= window_end
+    ]
+    if ids_alerts_in_window:
+        for alert in ids_alerts_in_window:
+            events.append({
+                "timestamp": alert["timestamp"],
+                "source": "IDS",
+                "description": (
+                    f"[{alert['severity']}] {alert['rule']}: {alert['description']} "
+                    f"(source {alert['source_ip']})"
+                ),
+            })
+    else:
+        events.append({
+            "timestamp": window_end,
+            "source": "IDS",
+            "description": (
+                "NO DETECTION EVENT logged in this window - either the IDS "
+                "(Phase 11) was not running, or this particular write did "
+                "not trigger any of its rules. This gap is reported "
+                "honestly rather than inventing a detection event."
+            ),
+        })
 
     events.sort(key=lambda e: e["timestamp"])
     return events

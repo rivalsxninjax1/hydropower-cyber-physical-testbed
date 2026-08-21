@@ -6,6 +6,11 @@
 # other container, with no isolation between what will later become
 # separate corporate/DMZ/OT zones.
 #
+# Phase 12 adds docker-compose.segmented.yml - the "after" state,
+# splitting this into corp_net/dmz_net/ot_net with a firewall
+# boundary - so the two files can be run and compared directly for
+# the segmentation experiment's before/after evidence.
+#
 # Usage:
 #   docker compose up --build
 #   docker compose down
@@ -54,6 +59,22 @@ services:
       - plc
     restart: unless-stopped
 
+  ids:
+    build:
+      context: .
+      dockerfile: security/ids/Dockerfile
+    container_name: ids
+    network_mode: "service:plc"
+    cap_add:
+      - NET_RAW
+      - NET_ADMIN
+    volumes:
+      - ./data:/app/data
+    depends_on:
+      - plc
+    restart: unless-stopped
+
 networks:
   flat_net:
     driver: bridge
+    

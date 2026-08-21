@@ -1,0 +1,32 @@
+{
+  "experiment_id": "01-modbus-control",
+  "timestamp": 1787308948.8364117,
+  "target_host": "plc",
+  "target_port": 5020,
+  "register_written": 6,
+  "raw_value_written": 1000,
+  "write_accepted": true,
+  "baseline_registers": [
+    720,
+    450,
+    687,
+    1500,
+    313,
+    0,
+    450
+  ],
+  "final_registers": [
+    720,
+    690,
+    1054,
+    1712,
+    480,
+    1,
+    1000
+  ],
+  "baseline_alarm_code": 0,
+  "final_alarm_code": 1,
+  "alarm_state_changed": true,
+  "time_to_alarm_change_s": 5.56,
+  "attack_success": true
+}

@@ -1,10 +1,12 @@
 """
 Historian + alarm-event database.
 
-A single lightweight SQLite database backs two tables:
+A single lightweight SQLite database backs four tables:
 
   telemetry_log  — one row per poll tick, the full plant state
   alarm_events   — one row per alarm STATE TRANSITION (not every tick)
+  plc_events     — one row per control register command the PLC applied
+  ids_alerts     — one row per IDS rule violation (Phase 11)
 
 This is the project's first persistent data store, and becomes the
 foundation for:
@@ -79,6 +81,16 @@ def init_db() -> None:
                 description TEXT
             )
         """)
+        conn.execute("""
+            CREATE TABLE IF NOT EXISTS ids_alerts (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                timestamp REAL NOT NULL,
+                source_ip TEXT,
+                severity TEXT NOT NULL,
+                rule TEXT NOT NULL,
+                description TEXT
+            )
+        """)
         conn.commit()
     finally:
         conn.close()
@@ -124,6 +136,7 @@ def record_alarm_transition(previous_state: Optional[str], new_state: str) -> No
     finally:
         conn.close()
 
+
 def record_plc_event(register: int, previous_raw: Optional[int], new_raw: int, description: str = "") -> None:
     """Records the moment the PLC's control loop actually APPLIED a
     changed register value — distinct from the network write itself
@@ -142,6 +155,24 @@ def record_plc_event(register: int, previous_raw: Optional[int], new_raw: int, d
         conn.commit()
     finally:
         conn.close()
+
+
+def record_ids_alert(source_ip: Optional[str], severity: str, rule: str, description: str = "") -> None:
+    """Records an alert raised by the IDS (security/ids/modbus_ids.py).
+    Only actual rule violations get a row here — like alarm_events,
+    this table is meant to stay sparse and meaningful, not a full
+    traffic log."""
+    conn = _connect()
+    try:
+        conn.execute(
+            """INSERT INTO ids_alerts (timestamp, source_ip, severity, rule, description)
+               VALUES (?, ?, ?, ?, ?)""",
+            (time.time(), source_ip, severity, rule, description),
+        )
+        conn.commit()
+    finally:
+        conn.close()
+
 
 def get_recent_telemetry(limit: int = 100) -> list:
     conn = _connect()
@@ -164,11 +195,23 @@ def get_recent_alarm_events(limit: int = 50) -> list:
     finally:
         conn.close()
 
+
 def get_recent_plc_events(limit: int = 50) -> list:
     conn = _connect()
     try:
         rows = conn.execute(
             "SELECT * FROM plc_events ORDER BY id DESC LIMIT ?", (limit,)
+        ).fetchall()
+        return [dict(row) for row in rows]
+    finally:
+        conn.close()
+
+
+def get_recent_ids_alerts(limit: int = 50) -> list:
+    conn = _connect()
+    try:
+        rows = conn.execute(
+            "SELECT * FROM ids_alerts ORDER BY id DESC LIMIT ?", (limit,)
         ).fetchall()
         return [dict(row) for row in rows]
     finally:
