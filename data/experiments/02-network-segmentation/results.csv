@@ -1,0 +1,4 @@
+experiment_id,timestamp,target_host,target_port,dns_resolution_success,dns_resolution_result,dns_resolution_time_s,tcp_connect_success,tcp_connect_error,tcp_connect_time_s,attack_path_reachable
+02-network-segmentation,1787384949.1445096,plc,5020,True,172.20.0.2,0.004,True,,0.0,True
+02-network-segmentation,1787385103.1838381,plc,5020,False,[Errno -2] Name or service not known,0.006,False,[Errno -2] Name or service not known,0.006,False
+02-network-segmentation,1787385189.50256,plc,5020,True,172.20.0.2,0.002,True,,0.0,True

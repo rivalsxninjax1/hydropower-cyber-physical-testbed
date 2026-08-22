@@ -1,0 +1,13 @@
+{
+  "experiment_id": "02-network-segmentation",
+  "timestamp": 1787385103.1838381,
+  "target_host": "plc",
+  "target_port": 5020,
+  "dns_resolution_success": false,
+  "dns_resolution_result": "[Errno -2] Name or service not known",
+  "dns_resolution_time_s": 0.006,
+  "tcp_connect_success": false,
+  "tcp_connect_error": "[Errno -2] Name or service not known",
+  "tcp_connect_time_s": 0.006,
+  "attack_path_reachable": false
+}

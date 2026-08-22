@@ -1,0 +1,77 @@
+# Config B - segmented network (mitigation applied).
+#
+# This is the "after" state for Section 18's segmentation experiment,
+# compared directly against docker-compose.yml's Config A.
+#
+# The attacker container moves from flat_net to its own corp_net, and
+# the PLC/dashboard move to ot_net. There is NO third network and NO
+# gateway container bridging the two.
+#
+# Usage - run this INSTEAD OF docker-compose.yml, never at the same
+# time. Bring Config A down first:
+#   docker compose down
+#   docker compose -f docker-compose.segmented.yml up --build -d
+#   docker compose -f docker-compose.segmented.yml down
+
+services:
+  plc:
+    build:
+      context: .
+      dockerfile: industrial/plc/Dockerfile
+    container_name: plc
+    networks:
+      - ot_net
+    volumes:
+      - ./data:/app/data
+    restart: unless-stopped
+
+  dashboard:
+    build:
+      context: .
+      dockerfile: dashboard/backend/Dockerfile
+    container_name: dashboard
+    environment:
+      - PLC_HOST=plc
+      - PLC_PORT=5020
+    networks:
+      - ot_net
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./data:/app/data
+    depends_on:
+      - plc
+    restart: unless-stopped
+
+  attacker:
+    build:
+      context: .
+      dockerfile: attacker/Dockerfile
+    container_name: attacker
+    networks:
+      - corp_net
+    volumes:
+      - ./experiments:/app/experiments
+      - ./data:/app/data
+    restart: unless-stopped
+
+  ids:
+    build:
+      context: .
+      dockerfile: security/ids/Dockerfile
+    container_name: ids
+    network_mode: "service:plc"
+    cap_add:
+      - NET_RAW
+      - NET_ADMIN
+    volumes:
+      - ./data:/app/data
+    depends_on:
+      - plc
+    restart: unless-stopped
+
+networks:
+  ot_net:
+    driver: bridge
+  corp_net:
+    driver: bridge

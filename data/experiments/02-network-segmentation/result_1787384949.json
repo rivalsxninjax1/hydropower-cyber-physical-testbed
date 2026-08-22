@@ -1,0 +1,13 @@
+{
+  "experiment_id": "02-network-segmentation",
+  "timestamp": 1787384949.1445096,
+  "target_host": "plc",
+  "target_port": 5020,
+  "dns_resolution_success": true,
+  "dns_resolution_result": "172.20.0.2",
+  "dns_resolution_time_s": 0.004,
+  "tcp_connect_success": true,
+  "tcp_connect_error": null,
+  "tcp_connect_time_s": 0.0,
+  "attack_path_reachable": true
+}
