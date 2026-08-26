@@ -9,11 +9,14 @@ transitions) — and merges them into a single chronological narrative.
 This is the practical demonstration of Section 24 of the project spec:
     Network Event + PLC Event + Physics Event + HMI Event = Security Incident
 
-No IDS exists yet (that's Phase 11) — there is deliberately no
-"detection" row with a real timestamp in this timeline, only an
-explicit note that the gap exists. Labeling that gap rather than
-inventing a detection event matches Section 43's "do not fake results"
-rule.
+Phase 13 extends each event with the structured fields Section 16
+asks for (source/target/protocol/action/result/stage), so this same
+data can drive both the CLI printout and the attack-path dashboard
+page, not just prose descriptions.
+
+No IDS existed at Phase 10 — the placeholder logic still exists and
+fires honestly if the IDS wasn't running for a given run, or if that
+particular write didn't trigger any rule.
 
 Usage:
     python3 -m security.correlation.build_timeline [experiment_result.json]
@@ -58,7 +61,12 @@ def build_timeline(experiment_path: Path) -> list:
 
     events = [{
         "timestamp": network_event_time,
-        "source": "Network",
+        "source": experiment["target_host"],
+        "target": "plc",
+        "stage": "Control Command",
+        "protocol": "Modbus TCP",
+        "action": f"Write holding register {experiment['register_written']} = {experiment['raw_value_written']}",
+        "result": "Accepted" if experiment.get("write_accepted") else "Rejected",
         "description": (
             f"Unauthorized Modbus write: register {experiment['register_written']} "
             f"= {experiment['raw_value_written']} (from {experiment['target_host']})"
@@ -69,7 +77,12 @@ def build_timeline(experiment_path: Path) -> list:
         if window_start <= plc_event["timestamp"] <= window_end:
             events.append({
                 "timestamp": plc_event["timestamp"],
-                "source": "PLC",
+                "source": "plc",
+                "target": "physics engine",
+                "stage": "PLC/RTU Access",
+                "protocol": "Modbus TCP (internal)",
+                "action": "Apply register value to physical process",
+                "result": "Applied",
                 "description": plc_event["description"] or (
                     f"Register {plc_event['register']} changed "
                     f"{plc_event['previous_raw']} -> {plc_event['new_raw']}"
@@ -88,7 +101,12 @@ def build_timeline(experiment_path: Path) -> list:
         if not flow_milestone_logged and row["flow_m3s"] > baseline_flow * 1.1:
             events.append({
                 "timestamp": row["timestamp"],
-                "source": "Physics",
+                "source": "physics engine",
+                "target": "reservoir/turbine",
+                "stage": "Physical Impact",
+                "protocol": "N/A (physical process)",
+                "action": "Flow rate deviates from baseline",
+                "result": f"{baseline_flow:.1f} -> {row['flow_m3s']:.1f} m3/s",
                 "description": (
                     f"Flow rate detectably increasing: {baseline_flow:.1f} -> "
                     f"{row['flow_m3s']:.1f} m3/s"
@@ -98,7 +116,12 @@ def build_timeline(experiment_path: Path) -> list:
         if not rpm_milestone_logged and row["turbine_rpm"] > baseline_rpm * 1.05:
             events.append({
                 "timestamp": row["timestamp"],
-                "source": "Physics",
+                "source": "physics engine",
+                "target": "turbine",
+                "stage": "Physical Impact",
+                "protocol": "N/A (physical process)",
+                "action": "Turbine RPM deviates from baseline",
+                "result": f"{baseline_rpm:.1f} -> {row['turbine_rpm']:.1f}",
                 "description": (
                     f"Turbine RPM detectably increasing: {baseline_rpm:.1f} -> "
                     f"{row['turbine_rpm']:.1f}"
@@ -110,7 +133,12 @@ def build_timeline(experiment_path: Path) -> list:
         if window_start <= alarm_event["timestamp"] <= window_end:
             events.append({
                 "timestamp": alarm_event["timestamp"],
-                "source": "HMI/Alarm",
+                "source": "physics engine",
+                "target": "dashboard/HMI",
+                "stage": "HMI Alarm",
+                "protocol": "N/A (internal state)",
+                "action": "Alarm threshold crossed",
+                "result": f"{alarm_event['previous_state']} -> {alarm_event['new_state']}",
                 "description": (
                     f"Alarm state changed: {alarm_event['previous_state']} -> "
                     f"{alarm_event['new_state']}"
@@ -125,7 +153,12 @@ def build_timeline(experiment_path: Path) -> list:
         for alert in ids_alerts_in_window:
             events.append({
                 "timestamp": alert["timestamp"],
-                "source": "IDS",
+                "source": alert["source_ip"],
+                "target": "plc",
+                "stage": "IDS Alert",
+                "protocol": "Modbus TCP (observed)",
+                "action": alert["rule"],
+                "result": alert["severity"],
                 "description": (
                     f"[{alert['severity']}] {alert['rule']}: {alert['description']} "
                     f"(source {alert['source_ip']})"
@@ -134,7 +167,12 @@ def build_timeline(experiment_path: Path) -> list:
     else:
         events.append({
             "timestamp": window_end,
-            "source": "IDS",
+            "source": "ids",
+            "target": "N/A",
+            "stage": "IDS Alert",
+            "protocol": "N/A",
+            "action": "N/A",
+            "result": "NO DETECTION EVENT",
             "description": (
                 "NO DETECTION EVENT logged in this window - either the IDS "
                 "(Phase 11) was not running, or this particular write did "
@@ -152,7 +190,8 @@ def print_timeline(events: list) -> None:
     t0 = events[0]["timestamp"]
     for e in events:
         offset = e["timestamp"] - t0
-        print(f"  t+{offset:5.2f}s  [{e['source']:10s}]  {e['description']}")
+        stage = e.get("stage", e.get("source", ""))
+        print(f"  t+{offset:5.2f}s  [{stage:16s}]  {e['description']}")
     print()
 
 

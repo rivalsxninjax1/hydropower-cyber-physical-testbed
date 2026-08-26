@@ -104,7 +104,7 @@ def main() -> None:
     }
 
     RESULTS_DIR.mkdir(parents=True, exist_ok=True)
-    json_path = RESULTS_DIR / f"result_{int(write_time)}.json"
+    json_path = RESULTS_DIR / f"result_{int(write_time * 1000)}.json"
     with open(json_path, "w") as f:
         json.dump(result, f, indent=2)
 

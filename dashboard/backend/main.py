@@ -20,6 +20,8 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse
 from pydantic import BaseModel, Field
 
+
+
 from pymodbus.client import AsyncModbusTcpClient
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
@@ -27,6 +29,10 @@ sys.path.insert(0, str(REPO_ROOT))
 
 from industrial.plc import register_map as regs  # noqa: E402
 from scada.historian import db as historian  # noqa: E402
+from security.correlation import build_timeline as correlation  # noqa: E402
+import glob  # noqa: E402
+
+
 
 # Configurable via environment so this works both:
 #   - run directly on the host (PLC_HOST defaults to 127.0.0.1)
@@ -138,6 +144,77 @@ async def get_alarms(limit: int = 50) -> list:
     return historian.get_recent_alarm_events(limit=limit)
 
 
+@app.get("/api/attack-timeline")
+async def get_attack_timeline() -> dict:
+    """
+    Phase 13: the structured, stage-by-stage attack timeline (Section
+    16's timestamp/source/target/action/protocol/result fields),
+    built from Experiment 01's most recent result plus the historian.
+
+    Returns {"available": False, "reason": ...} rather than an error
+    if no experiment has been run yet, so the frontend can show a
+    clear "run an experiment first" message instead of a broken page.
+    """
+    try:
+        experiment_path = correlation.find_latest_experiment_result()
+    except FileNotFoundError as exc:
+        return {"available": False, "reason": str(exc), "events": []}
+
+    events = correlation.build_timeline(experiment_path)
+    return {"available": True, "reason": None, "events": events}
+
+
+@app.get("/api/attack-graph-state")
+async def get_attack_graph_state() -> dict:
+    """
+    Phase 13: whether the most recently recorded attack attempt
+    actually reached the PLC, for highlighting the attacker->plc edge
+    on the network graph. Checks both experiment folders (01's Modbus
+    write outcome and 02's network-reachability outcome) and uses
+    whichever result is more recent, since either can be the most
+    up-to-date signal depending on what was last run.
+    """
+    candidates = []
+
+    exp01_files = sorted(glob.glob(str(
+        REPO_ROOT / "data" / "experiments" / "01-modbus-control" / "result_*.json"
+    )))
+    if exp01_files:
+        with open(exp01_files[-1]) as f:
+            data = json.load(f)
+        candidates.append({
+            "timestamp": data["timestamp"],
+            "path_reachable": bool(data.get("write_accepted")),
+            "source_experiment": "01-modbus-control",
+            "detail": f"Modbus write {'accepted' if data.get('write_accepted') else 'rejected'} by PLC",
+        })
+
+    exp02_files = sorted(glob.glob(str(
+        REPO_ROOT / "data" / "experiments" / "02-network-segmentation" / "result_*.json"
+    )))
+    if exp02_files:
+        with open(exp02_files[-1]) as f:
+            data = json.load(f)
+        candidates.append({
+            "timestamp": data["timestamp"],
+            "path_reachable": bool(data.get("attack_path_reachable")),
+            "source_experiment": "02-network-segmentation",
+            "detail": (
+                "DNS + TCP reachable" if data.get("attack_path_reachable")
+                else f"Blocked: {data.get('dns_resolution_result') or data.get('tcp_connect_error')}"
+            ),
+        })
+
+    if not candidates:
+        return {
+            "available": False,
+            "path_reachable": None,
+            "detail": "No experiments have been run yet.",
+        }
+
+    latest = max(candidates, key=lambda c: c["timestamp"])
+    return {"available": True, **latest}
+
 @app.post("/api/gate")
 async def set_gate(command: GateCommand) -> dict:
     """
@@ -185,3 +262,7 @@ app.mount("/static", StaticFiles(directory=str(FRONTEND_DIR)), name="static")
 async def serve_index() -> FileResponse:
     return FileResponse(str(FRONTEND_DIR / "index.html"))
 
+
+@app.get("/attack-path")
+async def serve_attack_path() -> FileResponse:
+    return FileResponse(str(FRONTEND_DIR / "attack-path.html"))

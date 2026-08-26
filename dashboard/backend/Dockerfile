@@ -17,6 +17,7 @@ COPY industrial/plc/register_map.py ./industrial/plc/register_map.py
 COPY industrial/plc/__init__.py ./industrial/plc/__init__.py
 COPY industrial/__init__.py ./industrial/__init__.py
 COPY scada/ ./scada/
+COPY security/ ./security/
 COPY dashboard/ ./dashboard/
 
 EXPOSE 8000

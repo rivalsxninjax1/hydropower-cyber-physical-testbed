@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Hydropower Plant — Attack Path</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/static/style.css" />
+</head>
+<body>
+
+<header class="topbar">
+  <div class="topbar-title">
+    <span class="topbar-eyebrow">HYDROPOWER CYBER-PHYSICAL TESTBED</span>
+    <h1>Attack Path</h1>
+  </div>
+  <nav class="topnav">
+    <a href="/" class="topnav-link">Plant View</a>
+    <a href="/attack-path" class="topnav-link topnav-link-active">Attack Path</a>
+  </nav>
+  <div class="topbar-status">
+    <span id="conn-dot" class="dot dot-connected"></span>
+    <span id="conn-label">STATIC VIEW</span>
+  </div>
+</header>
+
+<div id="graph-status-banner" class="graph-status-banner graph-status-unknown">
+  <span id="graph-status-text">Checking most recent experiment result…</span>
+</div>
+
+<section class="panel graph-panel" style="margin: 20px 28px;">
+  <h2 class="panel-title">Network Topology &amp; Attack Path</h2>
+
+  <svg viewBox="0 0 900 320" xmlns="http://www.w3.org/2000/svg">
+    <!-- Zones -->
+    <rect x="30" y="40" width="220" height="240" rx="8" class="zone-box" />
+    <text x="140" y="30" class="zone-label" text-anchor="middle">CORP_NET</text>
+
+    <rect x="500" y="40" width="370" height="240" rx="8" class="zone-box" />
+    <text x="685" y="30" class="zone-label" text-anchor="middle">OT_NET</text>
+
+    <!-- Attacker node -->
+    <rect x="80" y="140" width="120" height="60" rx="6" class="node-box" />
+    <text x="140" y="165" class="node-label">attacker</text>
+    <text x="140" y="182" class="node-sublabel">Phase 8 tools</text>
+
+    <!-- Attack edge (dynamic) -->
+    <line id="edge-attack" x1="200" y1="170" x2="560" y2="170" class="edge-attack-unknown" />
+    <text id="edge-attack-label" x="380" y="155" class="node-sublabel" text-anchor="middle">checking...</text>
+
+    <!-- PLC node -->
+    <rect x="560" y="140" width="120" height="60" rx="6" class="node-box" />
+    <text x="620" y="165" class="node-label">plc</text>
+    <text x="620" y="182" class="node-sublabel">Modbus :5020</text>
+
+    <!-- IDS node (sidecar, monitoring PLC) -->
+    <rect x="560" y="230" width="120" height="44" rx="6" class="node-box" />
+    <text x="620" y="250" class="node-label" style="font-size:12px;">ids</text>
+    <text x="620" y="264" class="node-sublabel">network_mode: plc</text>
+    <line x1="620" y1="200" x2="620" y2="230" class="edge-monitor" />
+
+    <!-- Dashboard node -->
+    <rect x="740" y="140" width="120" height="60" rx="6" class="node-box" />
+    <text x="800" y="165" class="node-label">dashboard</text>
+    <text x="800" y="182" class="node-sublabel">HMI :8000</text>
+
+    <!-- PLC <-> Dashboard legit edge -->
+    <line x1="680" y1="170" x2="740" y2="170" class="edge-legit" />
+  </svg>
+</section>
+
+<div class="manual-stage-notice">
+  <strong>Reconnaissance, Network Access, and OT Discovery</strong> were
+  performed manually via <code>attacker/tools/network_scan.py</code>,
+  <code>modbus_recon.py</code>, and <code>modbus_probe_writable.py</code>
+  — see <code>docs/architecture/attacker-environment.md</code> for the
+  full transcript. These steps are not automatically timestamped, so
+  they are not shown as timeline rows below; only stages the system
+  itself logs with real timestamps are shown, per this project's
+  policy against inventing data.
+</div>
+
+<section class="panel timeline-panel">
+  <h2 class="panel-title">Logged Attack Timeline</h2>
+  <table class="timeline-table">
+    <thead>
+      <tr>
+        <th>Time</th>
+        <th>Stage</th>
+        <th>Source</th>
+        <th>Target</th>
+        <th>Protocol</th>
+        <th>Action</th>
+        <th>Result</th>
+      </tr>
+    </thead>
+    <tbody id="timeline-body">
+      <tr><td colspan="7" class="log-empty">Loading…</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<script src="/static/attack-path.js"></script>
+</body>
+</html>
