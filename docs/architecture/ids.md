@@ -72,9 +72,8 @@ IDS active now produces a materially different timeline than Phase
 
 | | Phase 10 (no IDS) | Phase 11 (with IDS) |
 |---|---|---|
-| First detection | t+8.14s (alarm system reacting to physical deviation) | **t+0.00s** (IDS observing the write itself) |
-| Detection mechanism | Physical consequence crossing an alarm threshold | Direct observation of the anomalous command, before any physical effect |
-
+| First detection | ~5.5s (attacker's own direct 0.5s-interval Modbus poll of the alarm register, measured 3× identically in `experiments/01-modbus-control/`) — up to ~8s if measured via the dashboard's independent 1.0s-interval poll instead (see `docs/evaluation/evaluation.md` for why these two numbers differ) | **t+0.00s** (IDS observing the write itself, before any physical effect exists to poll for) |
+| Detection mechanism | Physical consequence crossing an alarm threshold, observed by whichever poller happens to be watching | Direct observation of the anomalous command, before any physical effect |
 This is the actual measurable value of an IDS in an ICS context: it
 moves detection from "after the plant has already started
 misbehaving" to "the moment the bad command is sent" — which is
