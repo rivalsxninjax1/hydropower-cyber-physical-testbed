@@ -5,15 +5,15 @@ Threat Modeling, Attack Simulation, Detection, and Mitigation in
 Hydropower ICS/OT Networks**
 
 A final-year cybersecurity capstone project: a fully simulated,
-self-contained hydropower plant — physics engine, PLC, HMI, network,
-attacker, and intrusion detection system — built to study how
+self-contained hydropower plant  physics engine, PLC, HMI, network,
+attacker, and intrusion detection system built to study how
 cyberattacks on industrial control systems propagate into physical
 consequences, how they can be detected, and how network architecture
 affects whether they succeed at all.
 
 This is not a CTF. There are no flags, no scores, no leaderboards.
 Every claim in this repository is backed by a real, reproducible
-measurement — see [`docs/evaluation/evaluation.md`](docs/evaluation/evaluation.md)
+measurement  see [`docs/evaluation/evaluation.md`](docs/evaluation/evaluation.md)
 for a full accounting of what's measured versus what's still
 theoretical. Read [`ETHICS.md`](ETHICS.md) before using any of the
 attacker tooling.
@@ -32,7 +32,7 @@ Two measured, real experiments prove this chain end to end:
 | Experiment | Finding | Evidence |
 |---|---|---|
 | **01 — Unauthorized Modbus Control** | An attacker with only network access (no credentials) can command the plant's intake gate directly, causing a measurable physical deviation in ~5.5s | [`experiments/01-modbus-control/README.md`](experiments/01-modbus-control/README.md) — 3 identical runs |
-| **02 — Network Segmentation** | Moving the attacker to a properly segmented network blocks the attack entirely — DNS resolution fails before any Modbus traffic can be sent | [`experiments/02-network-segmentation/README.md`](experiments/02-network-segmentation/README.md) — real Docker-verified result |
+| **02 — Network Segmentation** | Moving the attacker to a properly segmented network blocks the attack entirely  DNS resolution fails before any Modbus traffic can be sent | [`experiments/02-network-segmentation/README.md`](experiments/02-network-segmentation/README.md) — real Docker-verified result |
 
 Phase 11's passive IDS reduces detection time for Experiment 01's
 attack from ~5.5-8s (the plant's own alarm system reacting to physical
@@ -84,19 +84,19 @@ hardcoded or simulated for effect:
 ## Architecture
 
 ```
-┌─────────────────────────────────────────────────────────────────┐
+┌────────────────────────────────────────────────────────────────-─┐
 │                     DOCKER COMPOSE NETWORK                       │
-│                                                                   │
-│  ┌────────────┐                          ┌────────────────────┐ │
-│  │  attacker  │──── flat or blocked ────▶ │      ot_net         │ │
-│  │ (nmap +    │     depending on config   │ ┌────────┐ ┌──────┐│ │
-│  │  Modbus     │                          │ │  plc   │◄┤ dash- ││ │
-│  │  tools)     │                          │ │ :5020  │ │ board ││ │
-│  └────────────┘                          │ └───┬────┘ │ :8000 ││ │
-│                                            │ ┌───▼────┐ └───┬───┘│ │
-│                                            │ │  ids   │     │    │ │
-│                                            │ └────────┘     │    │ │
-│                                            └────────────────┼────┘ │
+│                                                                  │
+│  ┌────────────┐                          ┌──────────────────-──┐ │
+│  │  attacker  │──── flat or blocked ────▶│      ot_net         │ |
+│  │ (nmap +    │     depending on config  │ ┌────────┐ ┌──────┐ │ │
+│  │  Modbus    │                          │ │  plc   │◄┤ dash-│ │ │
+│  │  tools)    │                          │ │ :5020  │ │ board│ │ │
+│  └────────────┘                          │ └───┬────┘ │ :8000│ │ │
+│                                          │ ┌───▼────┐ └───┬──┘ │ │
+│                                          │ │  ids   │     │    │ │
+│                                          │ └────────┘     │    │ │
+│                                          └────────────────┼────┘ │
 └───────────────────────────────────────────────────────────┼──────┘
                                                         (published)
                                                               │
@@ -106,20 +106,20 @@ hardcoded or simulated for effect:
 - **`simulation/`** — deterministic physics engine (reservoir → gate →
   turbine → generator), no randomness, every equation documented in
   [`docs/architecture/physics-model.md`](docs/architecture/physics-model.md)
-- **`industrial/plc/`** — Modbus TCP PLC bridging the physics engine to
+- **`industrial/plc/`** : Modbus TCP PLC bridging the physics engine to
   a documented 7-register map ([`docs/architecture/plc-register-map.md`](docs/architecture/plc-register-map.md))
-- **`dashboard/`** — FastAPI backend + vanilla HTML/CSS/JS frontend, no
+- **`dashboard/`** : FastAPI backend + vanilla HTML/CSS/JS frontend, no
   framework, no build step
-- **`scada/historian/`** — SQLite-backed telemetry, alarm, PLC-event,
+- **`scada/historian/`** : SQLite-backed telemetry, alarm, PLC-event,
   and IDS-alert logging
-- **`attacker/`** — isolated container with generic tools (nmap, a raw
+- **`attacker/`** : isolated container with generic tools (nmap, a raw
   Modbus client) and zero access to this project's own source code —
   it has to discover the register map by observation, the same way a
   real attacker would ([`docs/architecture/attacker-environment.md`](docs/architecture/attacker-environment.md))
-- **`security/ids/`** — passive Modbus TCP monitor, sniffing the PLC's
+- **`security/ids/`** : passive Modbus TCP monitor, sniffing the PLC's
   own network traffic independently of the pymodbus library it's
   monitoring ([`docs/architecture/ids.md`](docs/architecture/ids.md))
-- **`security/correlation/`** — merges network, PLC, physics, and
+- **`security/correlation/`** : merges network, PLC, physics, and
   alarm events from independent timestamped sources into one incident
   timeline ([`docs/architecture/correlation-timeline.md`](docs/architecture/correlation-timeline.md))
 
@@ -131,11 +131,11 @@ technology decision, is in
 
 | | `docker-compose.yml` (Config A) | `docker-compose.segmented.yml` (Config B) |
 |---|---|---|
-| Topology | One flat network | `corp_net` (attacker) / `ot_net` (plc, dashboard) — no conduit |
+| Topology | One flat network | `corp_net` (attacker) / `ot_net` (plc, dashboard) : no conduit |
 | Attacker → PLC | Reachable | **Blocked** — DNS resolution fails |
 
 Run either with `docker compose -f <file> up --build -d` (never both
-at once — see the comment at the top of `docker-compose.segmented.yml`).
+at once  see the comment at the top of `docker-compose.segmented.yml`).
 
 ---
 
@@ -143,7 +143,7 @@ at once — see the comment at the top of `docker-compose.segmented.yml`).
 
 Every ATT&CK for ICS technique and NIST CSF control cited in this
 project was individually verified against its primary source during
-development — none were cited from memory. See
+development  none were cited from memory. See
 [`docs/threat-model/threat-model.md`](docs/threat-model/threat-model.md)
 for the full assets/actors/surfaces analysis and mapping tables.
 
@@ -166,7 +166,7 @@ python -m pytest simulation/tests/ industrial/tests/ scada/tests/ security/tests
 **43 automated tests**, covering the physics engine, PLC register
 logic, historian persistence, and IDS detection rules. The packet-
 capture and Docker-networking pieces are intentionally *not*
-unit-tested — they were verified against real captured traffic and
+unit-tested they were verified against real captured traffic and
 real container-to-container connectivity during development instead,
 which is documented directly in the relevant `docs/architecture/*.md`
 file rather than asserted in a test file.
