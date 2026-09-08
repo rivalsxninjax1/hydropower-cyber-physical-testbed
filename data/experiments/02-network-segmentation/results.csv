@@ -1,0 +1,2 @@
+experiment_id,timestamp,target_host,target_port,dns_resolution_success,dns_resolution_result,dns_resolution_time_s,tcp_connect_success,tcp_connect_error,tcp_connect_time_s,attack_path_reachable
+02-network-segmentation,1787798366.5100253,plc,5020,True,172.20.0.2,0.003,True,,0.0,True

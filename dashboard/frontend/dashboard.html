@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Hydropower Plant — Dashboard</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/static/style.css" />
+</head>
+<body>
+
+<header class="topbar">
+  <div class="topbar-title">
+    <span class="topbar-eyebrow">HYDROPOWER CYBER-PHYSICAL TESTBED</span>
+    <h1>Dashboard</h1>
+  </div>
+  <nav class="topnav">
+    <a href="/" class="topnav-link topnav-link-active">Dashboard</a>
+    <a href="/plant" class="topnav-link">Plant View</a>
+    <a href="/security" class="topnav-link">Security Monitoring</a>
+    <a href="/attack-path" class="topnav-link">Attack Path</a>
+    <a href="/experiments" class="topnav-link">Experiments</a>
+  </nav>
+  <div class="topbar-status">
+    <span id="conn-dot" class="dot dot-unknown"></span>
+    <span id="conn-label">LOADING…</span>
+  </div>
+</header>
+
+<div class="overview-grid">
+  <div class="overview-tile">
+    <div class="overview-tile-label">Plant Status</div>
+    <div class="overview-tile-value" id="tile-alarm-state">—</div>
+    <div class="overview-tile-sub" id="tile-alarm-sub">Checking PLC connection…</div>
+  </div>
+
+  <div class="overview-tile">
+    <div class="overview-tile-label">Reservoir / Gate</div>
+    <div class="overview-tile-value" id="tile-level">—</div>
+    <div class="overview-tile-sub" id="tile-gate-sub">—</div>
+  </div>
+
+  <div class="overview-tile">
+    <div class="overview-tile-label">Generator Power</div>
+    <div class="overview-tile-value" id="tile-power">—</div>
+    <div class="overview-tile-sub" id="tile-power-sub">—</div>
+  </div>
+
+  <div class="overview-tile">
+    <div class="overview-tile-label">Security Status</div>
+    <div class="overview-tile-value" id="tile-security">—</div>
+    <div class="overview-tile-sub" id="tile-security-sub">Loading recent IDS alerts…</div>
+  </div>
+</div>
+
+<div class="link-cards-grid">
+  <a href="/plant" class="link-card">
+    <div class="link-card-title">Plant View →</div>
+    <div class="link-card-desc">Live animated schematic and telemetry, polled over real Modbus TCP from the PLC.</div>
+  </a>
+  <a href="/security" class="link-card">
+    <div class="link-card-title">Security Monitoring →</div>
+    <div class="link-card-desc">IDS alerts, PLC control-register events, and the alarm log — everything the historian has recorded.</div>
+  </a>
+  <a href="/attack-path" class="link-card">
+    <div class="link-card-title">Attack Path →</div>
+    <div class="link-card-desc">Network topology graph and the structured, timestamped attack timeline from the most recent experiment.</div>
+  </a>
+  <a href="/experiments" class="link-card">
+    <div class="link-card-title">Experiments →</div>
+    <div class="link-card-desc">Measured results from every experiment run, aggregated across runs — real data, not a static report.</div>
+  </a>
+</div>
+
+<script src="/static/dashboard.js"></script>
+</body>
+</html>

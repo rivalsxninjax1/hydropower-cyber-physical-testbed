@@ -481,3 +481,95 @@ body {
 .stage-Physical-Impact  { background: rgba(229, 72, 77, 0.15); color: var(--accent-critical); }
 .stage-HMI-Alarm        { background: rgba(229, 72, 77, 0.15); color: var(--accent-critical); }
 .stage-IDS-Alert        { background: rgba(45, 212, 191, 0.15); color: var(--accent-normal); }
+
+/* --- Dashboard landing page --- */
+.overview-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 16px;
+  margin: 20px 28px;
+}
+
+.overview-tile {
+  background: var(--panel);
+  border: 1px solid var(--panel-border);
+  border-radius: 8px;
+  padding: 18px 20px;
+}
+
+.overview-tile-label {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--text-muted);
+  margin-bottom: 10px;
+}
+
+.overview-tile-value {
+  font-family: var(--font-data);
+  font-size: 26px;
+  font-weight: 600;
+  margin-bottom: 4px;
+}
+
+.overview-tile-sub {
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+.overview-tile-value-normal { color: var(--accent-normal); }
+.overview-tile-value-warning { color: var(--accent-warning); }
+.overview-tile-value-critical { color: var(--accent-critical); }
+
+.link-cards-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 16px;
+  margin: 0 28px 28px;
+}
+
+.link-card {
+  display: block;
+  background: var(--panel);
+  border: 1px solid var(--panel-border);
+  border-radius: 8px;
+  padding: 16px 18px;
+  text-decoration: none;
+  transition: border-color 0.2s ease, transform 0.15s ease;
+}
+
+.link-card:hover {
+  border-color: var(--accent-normal);
+  transform: translateY(-1px);
+}
+
+.link-card-title {
+  color: var(--text-primary);
+  font-weight: 600;
+  font-size: 14px;
+  margin-bottom: 6px;
+}
+
+.link-card-desc {
+  color: var(--text-muted);
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+/* --- Security Monitoring / Experiments pages: generic section panel --- */
+.data-section {
+  margin: 0 28px 28px;
+}
+
+.data-section h2.panel-title {
+  margin-bottom: 4px;
+}
+
+.data-section-note {
+  font-size: 11px;
+  color: var(--text-muted);
+  margin: 0 0 12px;
+}
+
+.severity-CRITICAL { color: var(--accent-critical); font-weight: 600; }
+.severity-WARNING { color: var(--accent-warning); font-weight: 600; }

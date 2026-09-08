@@ -1,0 +1,131 @@
+{
+  "01-modbus-control": {
+    "run_count": 1,
+    "columns": {
+      "timestamp": {
+        "type": "numeric",
+        "count": 1,
+        "mean": 1787798360.053,
+        "min": 1787798360.053,
+        "max": 1787798360.053
+      },
+      "target_port": {
+        "type": "numeric",
+        "count": 1,
+        "mean": 5020.0,
+        "min": 5020.0,
+        "max": 5020.0
+      },
+      "register_written": {
+        "type": "numeric",
+        "count": 1,
+        "mean": 6.0,
+        "min": 6.0,
+        "max": 6.0
+      },
+      "raw_value_written": {
+        "type": "numeric",
+        "count": 1,
+        "mean": 1000.0,
+        "min": 1000.0,
+        "max": 1000.0
+      },
+      "write_accepted": {
+        "type": "boolean",
+        "count": 1,
+        "true_count": 1,
+        "false_count": 0,
+        "true_rate": 1.0
+      },
+      "baseline_alarm_code": {
+        "type": "numeric",
+        "count": 1,
+        "mean": 0.0,
+        "min": 0.0,
+        "max": 0.0
+      },
+      "final_alarm_code": {
+        "type": "numeric",
+        "count": 1,
+        "mean": 1.0,
+        "min": 1.0,
+        "max": 1.0
+      },
+      "alarm_state_changed": {
+        "type": "boolean",
+        "count": 1,
+        "true_count": 1,
+        "false_count": 0,
+        "true_rate": 1.0
+      },
+      "time_to_alarm_change_s": {
+        "type": "numeric",
+        "count": 1,
+        "mean": 6.07,
+        "min": 6.07,
+        "max": 6.07
+      },
+      "attack_success": {
+        "type": "boolean",
+        "count": 1,
+        "true_count": 1,
+        "false_count": 0,
+        "true_rate": 1.0
+      }
+    }
+  },
+  "02-network-segmentation": {
+    "run_count": 1,
+    "columns": {
+      "timestamp": {
+        "type": "numeric",
+        "count": 1,
+        "mean": 1787798366.51,
+        "min": 1787798366.51,
+        "max": 1787798366.51
+      },
+      "target_port": {
+        "type": "numeric",
+        "count": 1,
+        "mean": 5020.0,
+        "min": 5020.0,
+        "max": 5020.0
+      },
+      "dns_resolution_success": {
+        "type": "boolean",
+        "count": 1,
+        "true_count": 1,
+        "false_count": 0,
+        "true_rate": 1.0
+      },
+      "dns_resolution_time_s": {
+        "type": "numeric",
+        "count": 1,
+        "mean": 0.003,
+        "min": 0.003,
+        "max": 0.003
+      },
+      "tcp_connect_success": {
+        "type": "boolean",
+        "count": 1,
+        "true_count": 1,
+        "false_count": 0,
+        "true_rate": 1.0
+      },
+      "tcp_connect_time_s": {
+        "type": "numeric",
+        "count": 1,
+        "mean": 0.0,
+        "min": 0.0,
+        "max": 0.0
+      },
+      "attack_path_reachable": {
+        "type": "boolean",
+        "count": 1,
+        "true_count": 1,
+        "false_count": 0,
+        "true_rate": 1.0
+      }
+    }
+  }
+}

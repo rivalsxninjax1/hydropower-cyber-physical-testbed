@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Hydropower Plant — Security Monitoring</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/static/style.css" />
+</head>
+<body>
+
+<header class="topbar">
+  <div class="topbar-title">
+    <span class="topbar-eyebrow">HYDROPOWER CYBER-PHYSICAL TESTBED</span>
+    <h1>Security Monitoring</h1>
+  </div>
+  <nav class="topnav">
+    <a href="/" class="topnav-link">Dashboard</a>
+    <a href="/plant" class="topnav-link">Plant View</a>
+    <a href="/security" class="topnav-link topnav-link-active">Security Monitoring</a>
+    <a href="/attack-path" class="topnav-link">Attack Path</a>
+    <a href="/experiments" class="topnav-link">Experiments</a>
+  </nav>
+  <div class="topbar-status">
+    <span class="dot dot-connected"></span>
+    <span>REFRESHES EVERY 5s</span>
+  </div>
+</header>
+
+<section class="data-section">
+  <h2 class="panel-title">IDS Alerts</h2>
+  <p class="data-section-note">
+    From the passive Modbus IDS (Phase 11) — sniffs traffic on the
+    PLC's own network interface, independent of pymodbus.
+  </p>
+  <table class="log-table">
+    <thead>
+      <tr><th>Time</th><th>Severity</th><th>Rule</th><th>Source IP</th><th>Description</th></tr>
+    </thead>
+    <tbody id="ids-alerts-body">
+      <tr><td colspan="5" class="log-empty">Loading…</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<section class="data-section">
+  <h2 class="panel-title">PLC Control Events</h2>
+  <p class="data-section-note">
+    Every register command the PLC actually applied — logged the
+    moment its own control loop noticed the register changed (Phase 10).
+  </p>
+  <table class="log-table">
+    <thead>
+      <tr><th>Time</th><th>Register</th><th>Previous</th><th>New</th><th>Description</th></tr>
+    </thead>
+    <tbody id="plc-events-body">
+      <tr><td colspan="5" class="log-empty">Loading…</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<section class="data-section">
+  <h2 class="panel-title">Alarm Log</h2>
+  <p class="data-section-note">
+    Plant alarm state transitions (Phase 6) — only changes are logged, not every poll tick.
+  </p>
+  <table class="log-table">
+    <thead>
+      <tr><th>Time</th><th>Previous</th><th>New</th></tr>
+    </thead>
+    <tbody id="alarm-log-body">
+      <tr><td colspan="3" class="log-empty">Loading…</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<script src="/static/security.js"></script>
+</body>
+</html>
