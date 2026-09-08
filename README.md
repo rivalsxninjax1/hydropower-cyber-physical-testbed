@@ -191,7 +191,4 @@ documented-but-untested attack surface).
 
 ## License
 
-Add your chosen license here — none has been selected yet. If this is
-for academic submission, check your institution's requirements before
-choosing (some require a specific license or none at all for capstone
-work).
+This project is licensed under the MIT License - see [LICENSE](LICENSE) for details.
