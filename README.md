@@ -31,7 +31,7 @@ Two measured, real experiments prove this chain end to end:
 
 | Experiment | Finding | Evidence |
 |---|---|---|
-| **01 — Unauthorized Modbus Control** | An attacker with only network access (no credentials) can command the plant's intake gate directly, causing a measurable physical deviation in ~5.5s | [`experiments/01-modbus-control/README.md`](experiments/01-modbus-control/README.md) — 3 identical runs |
+| **01 : Unauthorized Modbus Control** | An attacker with only network access (no credentials) can command the plant's intake gate directly, causing a measurable physical deviation in ~5.5s | [`experiments/01-modbus-control/README.md`](experiments/01-modbus-control/README.md) : 3 identical runs |
 | **02 — Network Segmentation** | Moving the attacker to a properly segmented network blocks the attack entirely  DNS resolution fails before any Modbus traffic can be sent | [`experiments/02-network-segmentation/README.md`](experiments/02-network-segmentation/README.md) — real Docker-verified result |
 
 Phase 11's passive IDS reduces detection time for Experiment 01's
@@ -149,9 +149,9 @@ for the full assets/actors/surfaces analysis and mapping tables.
 
 | Technique | Tool | Verified against |
 |---|---|---|
-| T0846.001 — Remote System Discovery: Port Scan | `attacker/tools/network_scan.py` | attack.mitre.org |
-| T0861 — Point & Tag Identification | `attacker/tools/modbus_probe_writable.py` | attack.mitre.org |
-| T0855 — Unauthorized Command Message | `experiments/01-modbus-control/` | attack.mitre.org |
+| T0846.001 : Remote System Discovery: Port Scan | `attacker/tools/network_scan.py` | attack.mitre.org |
+| T0861 : Point & Tag Identification | `attacker/tools/modbus_probe_writable.py` | attack.mitre.org |
+| T0855 : Unauthorized Command Message | `experiments/01-modbus-control/` | attack.mitre.org |
 
 ---
 
@@ -191,4 +191,4 @@ documented-but-untested attack surface).
 
 ## License
 
-This project is licensed under the MIT License - see [LICENSE](LICENSE) for details.
+This project is licensed under the MIT License  see [LICENSE](LICENSE) for details.
